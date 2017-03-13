@@ -144,7 +144,9 @@ public class Joongang implements Parser {
 			System.out.println("publisher:\t"+_article.getPublisher());
 			
 			//DB저장
-			db.runSQL(keyword, _article);
+			if (Launch.enableDB){
+				db.runSQL(keyword, _article);
+			}
 			items++;
 		} //DB저장및로깅끝
 		

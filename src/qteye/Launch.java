@@ -4,6 +4,8 @@ import java.util.Scanner;
 
 public class Launch {
 
+	public static final boolean enableDB = false;
+
 	public static void main(String[] args) {
 		String startDate;
 		String endDate;
