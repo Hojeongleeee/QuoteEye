@@ -42,9 +42,9 @@ public class Hani implements Parser {
 	String query = "";
 	int maxpage=0;
 	int maxitem=0;
-	int currentpage=1;
+	int currentpage=0;
 	Document doc;
-	DBManager db = new DBManager();
+	DBManager db = null;
 	
 	//HTTP요청을 위한 멤ㅁ버변수들
 	private String tempUrl; //접속할Url
@@ -58,6 +58,11 @@ public class Hani implements Parser {
 
 	String result = ""; //doc = Jsoup.parse(result);	
 	
+	public Hani(DBManager db) {
+		// TODO Auto-generated constructor stub
+		this.db = db;
+	}
+
 	@SuppressWarnings("null")
 	public void doParse (String _startDate, String _endDate, String _keyword) {
 		//TODO 언론사별 query
@@ -79,18 +84,17 @@ public class Hani implements Parser {
 		
 		//URL세팅
 		initURL(this.keyword);
-		System.out.println(URL);
 		
 		//maxPage를 얻어냄
 		this.doc = getDOM(URL); //1페이지로
-		System.out.println(URL);
-		getMaxPage();
+		System.out.println("URL:"+URL);
+		getMaxPage(); //왜두번?
 		
 		//maxItem수를 얻어냄
 		//getMaxItem();//TODO 언론사별 필요여부
 		
 		//maxPage까지 반복
-		while (currentpage!=maxpage+1) {
+		while ((maxitem!=0)&&(currentpage!=maxpage)) { //TODO 언론사별 반복조건
 			//페이지마다의 URL로 Dom객체
 			this.doc = getDOM(URL);
 			Elements list = doc.select(".search-result-list").select("li");
@@ -98,12 +102,13 @@ public class Hani implements Parser {
 			//한 페이지마다 기사 10개
 			int n = 0;
 			
-			for(n=0;n<( (currentpage==maxpage)?(maxitem%10):10 );n++) {
+			for(n=0;n<( (  (currentpage+1==maxpage) 
+					&& (maxitem%10!=0) )?(maxitem%10):10 );n++) {
 				//url, title, date select css query TODO 언론사별
-				String url = list.select("dt").get(n).select("a").attr("href").toString();
-				String title = list.select("dt").get(n).select("a").text().replace("<strong>", "").replace("</strong>", "").replace("\"\"","").toString();
+				String url = list.get(n).child(0).child(1).select("a").attr("href");
+				String title = list.get(n).child(0).child(1).select("a").text().replace("<strong>", "").replace("</strong>", "").toString();
 				String date = list.select(".date").select("dd").get(n).text().substring(0, 10).replace(".", "");
-				String description = list.select(".detail").get(n).text().replace("<strong>", "").replaceAll("</strong>", "").trim();
+				String description = list.select(".detail").get(n).text().replace("<strong>", "").replace("</strong>", "").trim();
 				article = new Article();
 				
 				//article객체에 전부 setting
@@ -113,22 +118,15 @@ public class Hani implements Parser {
 				article.setDescription(description); //description 제외?
 				article.setPublisher("한겨레");
 				
-				//
-				
-				
-//				//article getter로 Url출력
-//				System.out.println(article.getUrl());				/* 로깅은 순서대로 url이 잘 print된다!! */
-//
-//
 				//article객체에 set
 				articleList.add(article);
 
-				//test용 로깅
-				System.out.println("-----------------");
-				System.out.println("title:"+title);
-				System.out.println("date:"+date);
-				System.out.println("url:"+url);
-				System.out.println("description:"+description);
+//				//test용 로깅
+//				System.out.println("-----------------");
+//				System.out.println("title:"+title);
+//				System.out.println("date:"+date);
+//				System.out.println("url:"+url);
+//				System.out.println("description:"+description);
 			}
 			
 			//다음 페이지로 URL 세팅
@@ -154,16 +152,19 @@ public class Hani implements Parser {
 			items++;
 		} //DB저장및로깅끝
 		
+		maxpage = 0;
+		currentpage = 0;
+		maxitem = 0;
 	}
 	
 	private int getMaxItem() {
-		String item = doc.select(".total_number").toString().replace("1-", "");
-		int startindex = item.indexOf("/");
-		int lastindex = item.indexOf("건");
-		item = item.substring(startindex+1, lastindex).replace(",", "").trim();
-		maxitem = Integer.parseInt(item);
-		
-		System.out.println("maxitem:"+maxitem);
+//		String item = doc.select(".total_number").toString().replace("1-", "");
+//		int startindex = item.indexOf("/");
+//		int lastindex = item.indexOf("건");
+//		item = item.substring(startindex+1, lastindex).replace(",", "").trim();
+//		maxitem = Integer.parseInt(item);
+//		
+//		System.out.println("maxitem:"+maxitem);
 		return maxitem;
 		//Jsoup로 dom의 maxpage 추출
 		//this.maxpage에 저장
@@ -184,12 +185,13 @@ public class Hani implements Parser {
 
 	//TODO 언론사별 MaxPage
 	public int getMaxPage() { //1-xxx / nnnn건
-		System.out.println(doc);
-		System.out.println();
 		this.maxitem = Integer.parseInt(this.doc.select(".search-title span").text().replace(" 건",""));
-		maxpage = this.maxitem/10;
+		
+		if (maxitem>10) maxpage = 1+this.maxitem/10;
+		else maxpage = 1;
 		
 		System.out.println("maxpage:"+maxpage);
+		System.out.println("maxitem:"+maxitem);
 		return maxpage;
 		//Jsoup로 dom의 maxpage 추출
 		//this.maxpage에 저장

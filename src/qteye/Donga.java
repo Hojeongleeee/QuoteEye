@@ -30,18 +30,19 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-public class Joongang implements Parser {
+public class Donga implements Parser {
 
 	String startDate = "";
 	String endDate = "";
 	String keyword = "";
-	String baseURL = "http://search.joins.com/JoongangNews?PeriodType=DirectInput&ScopeType=All&ServiceCode=&SourceGroupType=&ReporterCode=&ImageType=All&JplusType=All&BlogType=All&ImageSearchType=Image&MatchKeyword=&IncludeKeyword=&ExcluedeKeyword=";
+	//TODO 언론사별 baseURL
+	String baseURL = "http://search.chosun.com/search/news.search?orderby=news&naviarraystr=&kind=&cont1=&cont2=&cont5=&categoryname=&categoryd2=&c_scope=&premium=true&query=";
 	String tempURL = ""; //페이지번호 없는
 	String URL = ""; //페이지번호 있는
 	String query = "";
 	int maxpage=0;
 	int maxitem=0;
-	int currentpage=1;
+	int currentpage=0;
 	Document doc;
 	DBManager db = null;
 	
@@ -57,54 +58,58 @@ public class Joongang implements Parser {
 
 	String result = ""; //doc = Jsoup.parse(result);	
 	
-	public Joongang(DBManager db) {
+	public Donga(DBManager db) {
 		// TODO Auto-generated constructor stub
 		this.db = db;
 	}
 
 	@SuppressWarnings("null")
 	public void doParse (String _startDate, String _endDate, String _keyword) {
+		//TODO 언론사별 query
 		this.keyword = _keyword;
 		this.startDate = _startDate;
 		this.endDate = _endDate;
+		this.query = "&sdate="+startDate+"&edate="+endDate;
 		ArrayList <Article> articleList = new ArrayList<>();
 		Article article;
 		
-		//검색어를 URL의 쿼리로 포함
+		//검색어를 URL의 쿼리로 포함 
+		//TODO 언론사별 쿼리 차이
 		try {
 			keyword = URLEncoder.encode(_keyword, "UTF-8");
+			//keyword = _keyword;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		query = "&StartSearchDate="+startDate+"&EndSearchDate="+endDate+"&SortType=New&SearchCategoryType=JoongangNews"; //page num 마지막에 붙여야함
 		
 		//URL세팅
 		initURL(this.keyword);
-		System.out.println(URL);
 		
 		//maxPage를 얻어냄
 		this.doc = getDOM(URL); //1페이지로
-		System.out.println(URL);
-		getMaxPage();
-		
+		System.out.println("URL:"+URL);
+
 		//maxItem수를 얻어냄
-		getMaxItem();
+		getMaxItem();//TODO 언론사별 필요여부
+		getMaxPage(); //왜두번?
+		
 		
 		//maxPage까지 반복
-		while (currentpage!=maxpage+1) {
+		while ((maxitem!=0)&&(currentpage!=maxpage)) { //TODO 언론사별 반복조건
 			//페이지마다의 URL로 Dom객체
 			this.doc = getDOM(URL);
-			Elements list = doc.select(".list_default").select(".text");
+			Elements list = doc.select(".result_box").get(0).select("dl");
 			
 			//한 페이지마다 기사 10개
 			int n = 0;
 			
-			for(n=0;n<( ( currentpage==maxpage && maxitem%10!=0 )?(maxitem%10):10 );n++) {
-				//url, title, date select css query
-				String url = list.select("strong").get(n).select("a").attr("href").toString();
-				String title = list.select("strong").get(n).select("a").text().toString();
-				String date = list.select(".byline").select("em").get(1).text().substring(0, 10).replace(".", "");
-				String description = list.select(".lead").get(n).text().replace("<span class=\"lead\">", "").replaceAll("</span>", "");
+			for(n=0;n<( (  (currentpage+1==maxpage) 
+					&& (maxitem%10!=0) )?(maxitem%10):10 );n++) {
+				//url, title, date select css query TODO 언론사별
+				String url = list.get(n).select("a").get(0).attr("href");
+				String title = list.get(n).select("a").get(1).text();
+				String date = url.substring(url.lastIndexOf("/")+1,url.lastIndexOf("/")+9);
+				String description = list.get(n).select("a").get(2).text();
 				article = new Article();
 				
 				//article객체에 전부 setting
@@ -112,15 +117,8 @@ public class Joongang implements Parser {
 				article.setUrl(url);			
 				article.setDate(date);
 				article.setDescription(description); //description 제외?
-				article.setPublisher("중앙일보");
+				article.setPublisher("조선일보"); //TODO 언론사별
 				
-				//
-				
-				
-//				//article getter로 Url출력
-//				System.out.println(article.getUrl());				/* 로깅은 순서대로 url이 잘 print된다!! */
-//
-//
 				//article객체에 set
 				articleList.add(article);
 
@@ -155,13 +153,16 @@ public class Joongang implements Parser {
 			items++;
 		} //DB저장및로깅끝
 		
+		maxpage = 0;
+		currentpage = 0;
+		maxitem = 0;
 	}
 	
 	private int getMaxItem() {
-		String item = doc.select(".total_number").toString().replace("1-", "");
-		int startindex = item.indexOf("/");
+		String item = doc.select(".result_box").get(0).select("h3").select("em").text().toString().replace("(", "").replace(")","");
+		int startindex = 0;
 		int lastindex = item.indexOf("건");
-		item = item.substring(startindex+1, lastindex).replace(",", "").trim();
+		item = item.substring(startindex, lastindex-1).replace(",", "").trim();
 		maxitem = Integer.parseInt(item);
 		
 		System.out.println("maxitem:"+maxitem);
@@ -172,24 +173,22 @@ public class Joongang implements Parser {
 
 	public void initURL(String _keyword) {
 		//검색어->인코딩->URL에저장
-		try {
-			String keyword = URLEncoder.encode(_keyword, "UTF-8");
-			this.query = this.query + "&Keyword="+keyword;
-			this.tempURL = baseURL+this.query+"&page=";
-			URL=tempURL+"1"; //currentpage는 1로 초기화되어있음 
-
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			String keyword = URLEncoder.encode(_keyword, "UTF-8");
+			String keyword = _keyword;
+//			this.query = this.query; //TODO 언론사별 keyword 쿼린
+			this.tempURL = baseURL+keyword+this.query+"&pageno="; //TODO 언론사별 page쿼리
+			URL=tempURL+"0"; //currentpage는 0으로 초기화되어있음 
+//
+//		} catch (UnsupportedEncodingException e) {
+//			e.printStackTrace();
+//		}
 	}
 
-	
+	//TODO 언론사별 MaxPage
 	public int getMaxPage() { //1-xxx / nnnn건
-		String page = doc.select(".total_number").toString().replace("1-", "");
-		int lastindex = page.indexOf("/");
-		int startindex = page.indexOf(">")+1;
-		page = page.substring(startindex, lastindex).trim();
-		maxpage = Integer.parseInt(page);
+		if (maxitem>10) maxpage = 1+this.maxitem/10;
+		else maxpage = 1;
 		
 		System.out.println("maxpage:"+maxpage);
 		return maxpage;

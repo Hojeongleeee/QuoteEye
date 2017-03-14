@@ -18,8 +18,11 @@ public class Launch {
 		lastDate = "";
 		endDate = "2017.03.10"; //자꾸바꿔야함
 
-		Joongang jn = new Joongang();
-		Hani hani = new Hani();
+		DBManager db = new DBManager();
+
+		Joongang jn = new Joongang(db);
+		Hani hani = new Hani(db);
+		Joseon js = new Joseon(db);
 		
 		//후보자 
 		ArrayList <String> candidates = new ArrayList<>();
@@ -34,9 +37,9 @@ public class Launch {
 			//중앙일보
 		//	jn.doParse(startDate, endDate, candidate);
 			//한겨레
-			hani.doParse(startDate, endDate, candidate);
+		//	hani.doParse(startDate, endDate, candidate);
 			//조선일보
-			
+			js.doParse(startDate, endDate, candidate);
 			//동아일보
 			
 			//뉴시스
