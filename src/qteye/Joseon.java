@@ -133,7 +133,6 @@ public class Joseon implements Parser {
 		//DB저장 및 로깅
 		int items=1;
 		for (Article _article : articleList) {
-			System.out.println(keyword+" "+items+". "+_article.getUrl());
 //			System.out.println("------No."+items+"-------");
 //			System.out.println("title:\t\t"+_article.getTitle());
 //			System.out.println("date:\t\t"+_article.getDate());

@@ -80,11 +80,9 @@ public class Joongang implements Parser {
 		
 		//URL세팅
 		initURL(this.keyword);
-		System.out.println(URL);
 		
 		//maxPage를 얻어냄
 		this.doc = getDOM(URL); //1페이지로
-		System.out.println(URL);
 		getMaxPage();
 		
 		//maxItem수를 얻어냄
@@ -114,22 +112,10 @@ public class Joongang implements Parser {
 				article.setDescription(description); //description 제외?
 				article.setPublisher("중앙일보");
 				article.setCandidate(_keyword);
-				//
 				
-				
-//				//article getter로 Url출력
-//				System.out.println(article.getUrl());				/* 로깅은 순서대로 url이 잘 print된다!! */
-//
-//
 				//article객체에 set
 				articleList.add(article);
 
-//				//test용 로깅
-//				System.out.println("-----------------");
-//				System.out.println("title:"+title);
-//				System.out.println("date:"+date);
-//				System.out.println("url:"+url);
-//				System.out.println("description:"+description);
 			}
 			
 			//다음 페이지로 URL 세팅
@@ -139,9 +125,7 @@ public class Joongang implements Parser {
 		
 		
 		//DB저장 및 로깅
-		int items=1;
 		for (Article _article : articleList) {
-			System.out.println(keyword+" "+items+". "+_article.getUrl());
 //			System.out.println("------No."+items+"-------");
 //			System.out.println("title:\t\t"+_article.getTitle());
 //			System.out.println("date:\t\t"+_article.getDate());
@@ -153,7 +137,6 @@ public class Joongang implements Parser {
 			if (Launch.enableDB){
 				db.runSQL(keyword, _article);
 			}
-			items++;
 		} //DB저장및로깅끝
 	}
 	
@@ -191,6 +174,10 @@ public class Joongang implements Parser {
 	
 	public int getMaxPage() { //1-xxx / nnnn건
 		String page = doc.select(".total_number").toString().replace("1-", "");
+		if (page.equals("")){
+			maxpage=0;
+			return maxpage;
+		}
 		int lastindex = page.indexOf("/");
 		int startindex = page.indexOf(">")+1;
 		page = page.substring(startindex, lastindex).trim();

@@ -11,7 +11,7 @@ import java.util.Scanner;
 public class Launch {
 	public static int count = 0;
 	//DB저장여부: true일때만 DB에 저장함
-	public static final boolean enableDB = false;
+	public static final boolean enableDB = true;
 
 	public static void main(String[] args) {
 		String startDate;
@@ -19,10 +19,14 @@ public class Launch {
 		String endDate;
 		DBManager db = new DBManager();
 		
+		double starttime = System.currentTimeMillis();
+		
+		
 		//시작&종료일 나중에
-		startDate = "2016.11.01";
-		lastDate = "";
-		endDate = "2017.03.21"; //자꾸바꿔야함
+		lastDate = "2017.03.21";
+
+		startDate = "2017.03.21";
+		endDate = "2017.03.22"; //자꾸바꿔야함
 
 
 		
@@ -46,6 +50,11 @@ public class Launch {
 			System.out.println("총 기사 건수:"+count);
 		} /*endfor*/
 		
+		double endtime = System.currentTimeMillis();
+		
+		System.out.println("시작시간:"+starttime);
+		System.out.println("종료시간:"+endtime);
+		System.out.println("소요시간:"+(endtime-starttime)/1000);
 	}
 
 }

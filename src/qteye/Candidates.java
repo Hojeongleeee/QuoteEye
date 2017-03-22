@@ -16,7 +16,7 @@ public class Candidates {
 		list.put("È«ÁØÇ¥",1024);
 		list.put("¹ÚÁÖ¼±",1031);
 		list.put("¼ÕÇĞ±Ô",1032);
-		list.put("¾ÈÃ¶¼ö",1033);
+//		list.put("¾ÈÃ¶¼ö",1033);
 		list.put("³²°æÇÊ",1041);
 		list.put("À¯½Â¹Î",1042);
 		list.put("½É»óÁ¤",1051);
