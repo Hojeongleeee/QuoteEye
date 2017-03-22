@@ -117,16 +117,10 @@ public class Hani implements Parser {
 				article.setDate(date);
 				article.setDescription(description); //description 제외?
 				article.setPublisher("한겨레");
-				
+				article.setCandidate(_keyword);
+
 				//article객체에 set
 				articleList.add(article);
-
-//				//test용 로깅
-//				System.out.println("-----------------");
-//				System.out.println("title:"+title);
-//				System.out.println("date:"+date);
-//				System.out.println("url:"+url);
-//				System.out.println("description:"+description);
 			}
 			
 			//다음 페이지로 URL 세팅
@@ -138,13 +132,14 @@ public class Hani implements Parser {
 		//DB저장 및 로깅
 		int items=1;
 		for (Article _article : articleList) {
-			System.out.println("------No."+items+"-------");
-			System.out.println("title:\t\t"+_article.getTitle());
-			System.out.println("date:\t\t"+_article.getDate());
-			System.out.println("url:\t\t"+_article.getUrl());
-			System.out.println("description:\t"+_article.getDescription());
-			System.out.println("publisher:\t"+_article.getPublisher());
-			
+			System.out.println(keyword+" "+items+". "+_article.getUrl());
+//			System.out.println("------No."+items+"-------");
+//			System.out.println("title:\t\t"+_article.getTitle());
+//			System.out.println("date:\t\t"+_article.getDate());
+//			System.out.println("url:\t\t"+_article.getUrl());
+//			System.out.println("description:\t"+_article.getDescription());
+//			System.out.println("publisher:\t"+_article.getPublisher());
+			Launch.count++;
 			//DB저장
 			if (Launch.enableDB){
 				db.runSQL(keyword, _article);
@@ -157,19 +152,6 @@ public class Hani implements Parser {
 		maxitem = 0;
 	}
 	
-	private int getMaxItem() {
-//		String item = doc.select(".total_number").toString().replace("1-", "");
-//		int startindex = item.indexOf("/");
-//		int lastindex = item.indexOf("건");
-//		item = item.substring(startindex+1, lastindex).replace(",", "").trim();
-//		maxitem = Integer.parseInt(item);
-//		
-//		System.out.println("maxitem:"+maxitem);
-		return maxitem;
-		//Jsoup로 dom의 maxpage 추출
-		//this.maxpage에 저장
-	}
-
 	public void initURL(String _keyword) {
 		//검색어->인코딩->URL에저장
 		try {
@@ -185,8 +167,14 @@ public class Hani implements Parser {
 
 	//TODO 언론사별 MaxPage
 	public int getMaxPage() { //1-xxx / nnnn건
-		this.maxitem = Integer.parseInt(this.doc.select(".search-title span").text().replace(" 건",""));
-		
+		String max = this.doc.select(".search-title span").text().replace(" 건","");
+		if (max.equals("")){
+			maxitem=0;
+			maxpage=0;
+			return maxitem;
+		}		
+		this.maxitem = Integer.parseInt(max);
+
 		if (maxitem>10) maxpage = 1+this.maxitem/10;
 		else maxpage = 1;
 		

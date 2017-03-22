@@ -118,16 +118,10 @@ public class Joseon implements Parser {
 				article.setDate(date);
 				article.setDescription(description); //description 제외?
 				article.setPublisher("조선일보"); //TODO 언론사별
-				
+				article.setCandidate(_keyword);
+
 				//article객체에 set
 				articleList.add(article);
-
-//				//test용 로깅
-//				System.out.println("-----------------");
-//				System.out.println("title:"+title);
-//				System.out.println("date:"+date);
-//				System.out.println("url:"+url);
-//				System.out.println("description:"+description);
 			}
 			
 			//다음 페이지로 URL 세팅
@@ -139,13 +133,14 @@ public class Joseon implements Parser {
 		//DB저장 및 로깅
 		int items=1;
 		for (Article _article : articleList) {
-			System.out.println("------No."+items+"-------");
-			System.out.println("title:\t\t"+_article.getTitle());
-			System.out.println("date:\t\t"+_article.getDate());
-			System.out.println("url:\t\t"+_article.getUrl());
-			System.out.println("description:\t"+_article.getDescription());
-			System.out.println("publisher:\t"+_article.getPublisher());
-			
+			System.out.println(keyword+" "+items+". "+_article.getUrl());
+//			System.out.println("------No."+items+"-------");
+//			System.out.println("title:\t\t"+_article.getTitle());
+//			System.out.println("date:\t\t"+_article.getDate());
+//			System.out.println("url:\t\t"+_article.getUrl());
+//			System.out.println("description:\t"+_article.getDescription());
+//			System.out.println("publisher:\t"+_article.getPublisher());
+			Launch.count++;
 			//DB저장
 			if (Launch.enableDB){
 				db.runSQL(keyword, _article);
@@ -160,9 +155,14 @@ public class Joseon implements Parser {
 	
 	private int getMaxItem() {
 		String item = doc.select(".result_box").get(0).select("h3").select("em").text().toString().replace("(", "").replace(")","");
+		if (item.equals("")){
+			maxitem=0;
+			System.out.println("기사없음");
+			return maxitem;
+		}
 		int startindex = 0;
 		int lastindex = item.indexOf("건");
-		item = item.substring(startindex, lastindex-1).replace(",", "").trim();
+		item = item.substring(startindex, lastindex).replace("건", "").replace(",", "").trim();
 		maxitem = Integer.parseInt(item);
 		
 		System.out.println("maxitem:"+maxitem);
@@ -173,16 +173,9 @@ public class Joseon implements Parser {
 
 	public void initURL(String _keyword) {
 		//검색어->인코딩->URL에저장
-//		try {
-//			String keyword = URLEncoder.encode(_keyword, "UTF-8");
 			String keyword = _keyword;
-//			this.query = this.query; //TODO 언론사별 keyword 쿼린
 			this.tempURL = baseURL+keyword+this.query+"&pageno="; //TODO 언론사별 page쿼리
 			URL=tempURL+"0"; //currentpage는 0으로 초기화되어있음 
-//
-//		} catch (UnsupportedEncodingException e) {
-//			e.printStackTrace();
-//		}
 	}
 
 	//TODO 언론사별 MaxPage

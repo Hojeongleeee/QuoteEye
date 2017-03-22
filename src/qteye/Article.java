@@ -6,6 +6,7 @@ public class Article {
 	private String url;
 	private String date;
 	private String publisher;
+	private String candidate;
 	
 	public Article setArticle(String _title, String _description, String _url, String _date, String _publisher, String _candidate) {
 		title=_title;
@@ -13,6 +14,7 @@ public class Article {
 		url=_url;
 		date=_date;
 		publisher=_publisher;
+		candidate=_candidate;
 		return this;
 	}
 	
@@ -61,6 +63,12 @@ public class Article {
 
 	public void setDate(String date) {
 		this.date = date;
+	}
+	public String getCandidate(){
+		return candidate;
+	}
+	public void setCandidate(String keyword){
+		this.candidate=keyword;
 	}
 
 }

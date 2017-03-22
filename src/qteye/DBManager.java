@@ -1,6 +1,9 @@
 package qteye;
-import java.sql.*;
-import com.mysql.jdbc.PreparedStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DBManager {
 //	static final String driverName = "org.gjt.mm.mysql.Driver";
@@ -11,13 +14,13 @@ public class DBManager {
 	Statement stmt = null;
 	ResultSet rs = null;
 	java.sql.PreparedStatement pstmt;
+	Candidates c = new Candidates();
 	int n=0;
 
 	//생성자로 DB세팅
 	public DBManager(){
 		try{
 			con = DriverManager.getConnection(Keys.dbURL,Keys.clientID,Keys.clientPassword);
-//			con = DriverManager.getConnection("jdbc:mysql://localhost/quoteeye","root","6303");
 			stmt = con.createStatement();
 		} catch (SQLException sqex) {
 			sqex.printStackTrace();
@@ -29,29 +32,24 @@ public class DBManager {
 		//SQL 실행
 		try {
 			//preparedStatement에 번호순대로 집어넣기 (setString() 등)
-			pstmt = con.prepareStatement("insert into Article (Title, Date, Description, URL, Publisher, ID) values (?,?,?,?,?,?);");
+//			pstmt = con.prepareStatement("insert into Article (Title, Date, Description, URL, Publisher, ID) values (?,?,?,?,?,?);");
+			pstmt = con.prepareStatement("CALL insertArticle(?, ?, ?, ?, ?, ?)");
 			/** SQL 순서
-			 * 1. candidate
-			 * 2. title 
-			 * 3. date
-			 * 4. description 
-			 * 5. url 
-			 * 6. publisher 
+			 * 1. title
+			 * 2. publisher 
+			 * 3. description
+			 * 4. date 
+			 * 5. url
+			 * 6. candidate
 			 */
+			
 			pstmt.setString(1, art.getTitle());
-			pstmt.setString(2, art.getDate());
+			pstmt.setString(2, art.getPublisher());
 			pstmt.setString(3, art.getDescription());
-			pstmt.setString(4, art.getUrl());
-			pstmt.setString(5, art.getPublisher());
-			pstmt.setString(6, Integer.toString(n) );
+			pstmt.setString(4, art.getDate());
+			pstmt.setString(5, art.getUrl());
+			pstmt.setString(6, c.list.get(art.getCandidate()).toString() ); //후보자 이름 넣으면 인물코드 가져옴
 			n++;
-			//PreparedStatement SQL TEST
-//			pstmt.setString(1, "반기문");
-//			pstmt.setString(2, "제목");
-//			pstmt.setString(3, "20160101");
-//			pstmt.setString(4, "Description");
-//			pstmt.setString(5, "http://어쩌구/url");
-//			pstmt.setString(6, "신문사어디");
 			
 			if(pstmt.execute()){ //sql 여기서도 실행됨... 둘중하나!
 				rs = pstmt.getResultSet(); //결과 (NullPointerException)

@@ -113,7 +113,7 @@ public class Joongang implements Parser {
 				article.setDate(date);
 				article.setDescription(description); //description 제외?
 				article.setPublisher("중앙일보");
-				
+				article.setCandidate(_keyword);
 				//
 				
 				
@@ -141,24 +141,29 @@ public class Joongang implements Parser {
 		//DB저장 및 로깅
 		int items=1;
 		for (Article _article : articleList) {
-			System.out.println("------No."+items+"-------");
-			System.out.println("title:\t\t"+_article.getTitle());
-			System.out.println("date:\t\t"+_article.getDate());
-			System.out.println("url:\t\t"+_article.getUrl());
-			System.out.println("description:\t"+_article.getDescription());
-			System.out.println("publisher:\t"+_article.getPublisher());
-			
+			System.out.println(keyword+" "+items+". "+_article.getUrl());
+//			System.out.println("------No."+items+"-------");
+//			System.out.println("title:\t\t"+_article.getTitle());
+//			System.out.println("date:\t\t"+_article.getDate());
+//			System.out.println("url:\t\t"+_article.getUrl());
+//			System.out.println("description:\t"+_article.getDescription());
+//			System.out.println("publisher:\t"+_article.getPublisher());
+			Launch.count++;
 			//DB저장
 			if (Launch.enableDB){
 				db.runSQL(keyword, _article);
 			}
 			items++;
 		} //DB저장및로깅끝
-		
 	}
 	
 	private int getMaxItem() {
 		String item = doc.select(".total_number").toString().replace("1-", "");
+		if (item.equals("")){
+			maxitem=0;
+			return maxitem;
+		}
+
 		int startindex = item.indexOf("/");
 		int lastindex = item.indexOf("건");
 		item = item.substring(startindex+1, lastindex).replace(",", "").trim();
