@@ -87,12 +87,15 @@ public class Hani implements Parser {
 		
 		//maxPage를 얻어냄
 		this.doc = getDOM(URL); //1페이지로
-		System.out.println("URL:"+URL);
+//		System.out.println("URL:"+URL);
 		getMaxPage(); //왜두번?
 		
 		//maxItem수를 얻어냄
 		//getMaxItem();//TODO 언론사별 필요여부
 		
+		//logging
+		System.out.println(_keyword+"(Hani): "+maxitem);
+
 		//maxPage까지 반복
 		while ((maxitem!=0)&&(currentpage!=maxpage)) { //TODO 언론사별 반복조건
 			//페이지마다의 URL로 Dom객체
@@ -145,6 +148,7 @@ public class Hani implements Parser {
 			}
 			items++;
 		} //DB저장및로깅끝
+//		System.out.println(_keyword+":"+items);
 		
 		maxpage = 0;
 		currentpage = 0;
@@ -177,8 +181,8 @@ public class Hani implements Parser {
 		if (maxitem>10) maxpage = 1+this.maxitem/10;
 		else maxpage = 1;
 		
-		System.out.println("maxpage:"+maxpage);
-		System.out.println("maxitem:"+maxitem);
+//		System.out.println("maxpage:"+maxpage);
+//		System.out.println("maxitem:"+maxitem);
 		return maxpage;
 		//Jsoup로 dom의 maxpage 추출
 		//this.maxpage에 저장

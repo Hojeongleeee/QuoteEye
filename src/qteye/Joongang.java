@@ -87,7 +87,10 @@ public class Joongang implements Parser {
 		
 		//maxItem수를 얻어냄
 		getMaxItem();
-		
+
+		//logging
+		System.out.println(_keyword+"(Joongang): "+maxitem);
+
 		//maxPage까지 반복
 		while (currentpage!=maxpage+1) {
 			//페이지마다의 URL로 Dom객체
@@ -115,7 +118,7 @@ public class Joongang implements Parser {
 				
 				//article객체에 set
 				articleList.add(article);
-
+				
 			}
 			
 			//다음 페이지로 URL 세팅
@@ -125,6 +128,7 @@ public class Joongang implements Parser {
 		
 		
 		//DB저장 및 로깅
+		int items=1;
 		for (Article _article : articleList) {
 //			System.out.println("------No."+items+"-------");
 //			System.out.println("title:\t\t"+_article.getTitle());
@@ -138,6 +142,7 @@ public class Joongang implements Parser {
 				db.runSQL(keyword, _article);
 			}
 		} //DB저장및로깅끝
+//		System.out.println(_keyword+":"+items);
 	}
 	
 	private int getMaxItem() {
@@ -152,7 +157,7 @@ public class Joongang implements Parser {
 		item = item.substring(startindex+1, lastindex).replace(",", "").trim();
 		maxitem = Integer.parseInt(item);
 		
-		System.out.println("maxitem:"+maxitem);
+//		System.out.println("maxitem:"+maxitem);
 		return maxitem;
 		//Jsoup로 dom의 maxpage 추출
 		//this.maxpage에 저장
@@ -183,7 +188,7 @@ public class Joongang implements Parser {
 		page = page.substring(startindex, lastindex).trim();
 		maxpage = Integer.parseInt(page);
 		
-		System.out.println("maxpage:"+maxpage);
+//		System.out.println("maxpage:"+maxpage);
 		return maxpage;
 		//Jsoup로 dom의 maxpage 추출
 		//this.maxpage에 저장

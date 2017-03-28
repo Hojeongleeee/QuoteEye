@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
+
 public class DBManager {
 //	static final String driverName = "org.gjt.mm.mysql.Driver";
 //	static final String dbURL = "jdbc:mysql://insighteye.cqsjnckwggck.ap-northeast-2.rds.amazonaws.com";
@@ -16,7 +18,7 @@ public class DBManager {
 	java.sql.PreparedStatement pstmt;
 	Candidates c = new Candidates();
 	int n=0;
-
+	int duplicate = 0;
 	//생성자로 DB세팅
 	public DBManager(){
 		try{
@@ -54,7 +56,9 @@ public class DBManager {
 			if(pstmt.execute()){ //sql 여기서도 실행됨... 둘중하나!
 				rs = pstmt.getResultSet(); //결과 (NullPointerException)
 			}			
-		} catch (SQLException e) { e.printStackTrace();}
+		} catch (SQLException e) {
+			duplicate++;
+		}
 	} //runSQL
 	
 	public void closeDB(){

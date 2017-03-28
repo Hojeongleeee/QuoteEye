@@ -87,12 +87,14 @@ public class Joseon implements Parser {
 		
 		//maxPage를 얻어냄
 		this.doc = getDOM(URL); //1페이지로
-		System.out.println("URL:"+URL);
+//		System.out.println("URL:"+URL);
 
 		//maxItem수를 얻어냄
 		getMaxItem();//TODO 언론사별 필요여부
 		getMaxPage(); //왜두번?
 		
+		//logging
+		System.out.println(_keyword+"(Joseon): "+maxitem);
 		
 		//maxPage까지 반복
 		while ((maxitem!=0)&&(currentpage!=maxpage)) { //TODO 언론사별 반복조건
@@ -146,6 +148,7 @@ public class Joseon implements Parser {
 			}
 			items++;
 		} //DB저장및로깅끝
+//		System.out.println(_keyword+":"+items);
 		
 		maxpage = 0;
 		currentpage = 0;
@@ -156,7 +159,6 @@ public class Joseon implements Parser {
 		String item = doc.select(".result_box").get(0).select("h3").select("em").text().toString().replace("(", "").replace(")","");
 		if (item.equals("")){
 			maxitem=0;
-			System.out.println("기사없음");
 			return maxitem;
 		}
 		int startindex = 0;
@@ -164,7 +166,7 @@ public class Joseon implements Parser {
 		item = item.substring(startindex, lastindex).replace("건", "").replace(",", "").trim();
 		maxitem = Integer.parseInt(item);
 		
-		System.out.println("maxitem:"+maxitem);
+//		System.out.println("maxitem:"+maxitem);
 		return maxitem;
 		//Jsoup로 dom의 maxpage 추출
 		//this.maxpage에 저장
@@ -182,7 +184,7 @@ public class Joseon implements Parser {
 		if (maxitem>10) maxpage = 1+this.maxitem/10;
 		else maxpage = 1;
 		
-		System.out.println("maxpage:"+maxpage);
+//		System.out.println("maxpage:"+maxpage);
 		return maxpage;
 		//Jsoup로 dom의 maxpage 추출
 		//this.maxpage에 저장
